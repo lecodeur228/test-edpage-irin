@@ -1,0 +1,20 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "compilerOptions": {
+    "strict": true,
+    "allowJs": true,
+    "noImplicitAny": false,
+    "types": ["vitest", "vite/client"],
+    "paths": {
+      "@/*": ["./resources/js/*"]
+    }
+  },
+  "include": [
+    "resources/**/*.ts",
+    "resources/**/*.d.ts",
+    "resources/**/*.vue",
+    "resources/*.vue",
+    "./*.config.ts",
+    "./*.d.ts"
+  ]
+}

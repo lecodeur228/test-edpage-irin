@@ -1,0 +1,12 @@
+@import 'tailwindcss' prefix(tw);
+@import 'ckeditor5-content.css';
+
+@layer utilities {
+  .sticky {
+    position: unset;
+  }
+
+  .collapse {
+    visibility: unset;
+  }
+}
