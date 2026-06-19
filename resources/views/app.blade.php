@@ -26,6 +26,7 @@
     @endif
 
     <!-- Put your styles here -->
+       <!-- Put your styles here -->
     <link rel="stylesheet" href="{{ asset('assets/css/plugins/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/plugins/aos.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/plugins/fontawesome.css') }}">
@@ -46,7 +47,6 @@
 <body>
     @inertia
 
-    <!-- Put your scripts here -->
     <script src="{{ asset('assets/js/plugins/jquery-3-7-1.min.js') }}"></script>
     <script src="{{ asset('assets/js/plugins/bootstrap.min.js') }}"></script>
     <script src="{{ asset('assets/js/plugins/fontawesome.js') }}"></script>

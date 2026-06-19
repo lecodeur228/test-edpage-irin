@@ -152,6 +152,115 @@ npm install -g @creopse/cli
 ```
 
 ### Commandes principales
-* **`creopse install`** (ou `php artisan creopse:install -t vue`) : Installe le package et crée les fichiers de structure. Cette commande génère aussi `public/creopse/install.lock` pour activer l'assistant d'installation web.
-* **`pnpm dev`** : Lance le serveur de développement Vite pour compiler les assets.
-* **`php artisan migrate --seed`** : Exécute les migrations et injecte les données par défaut si l'installation manuelle est préférée.
+
+#### Installation
+```bash
+npm install -g @creopse/cli
+creopse install                             # Installation complète (vous invite à choisir le template)
+creopse install -t vue                      # Installation avec template Vue (équivalent à php artisan creopse:install -t vue)
+creopse install -t react                    # Installation avec template React
+creopse install --no-force                  # Désactive le mode force (force activé par défaut)
+```
+
+#### Gestion des Sections
+```bash
+creopse section add NomSection              # Ajoute une section (crée composant + entrée BD)
+creopse section add Hero ContactForm Footer # Ajoute plusieurs sections à la fois
+creopse section remove NomSection           # Supprime une section et son entrée BD
+creopse section remove Hero Footer          # Supprime plusieurs sections
+```
+
+#### Gestion des Widgets
+```bash
+creopse widget add NomWidget                # Ajoute un widget (crée composant seulement)
+creopse widget add NewsletterForm Button    # Ajoute plusieurs widgets
+creopse widget remove NomWidget             # Supprime un widget
+creopse widget remove NewsletterForm Button # Supprime plusieurs widgets
+```
+
+#### Développement
+```bash
+pnpm dev                                    # Lance serveur Vite (frontend)
+php artisan serve                           # Lance serveur Laravel (backend)
+php artisan migrate --seed                  # Exécute migrations + données par défaut
+```
+
+---
+
+## 📚 8. Résumé & Flux de Travail
+
+### 8.1 Architecture globale
+```
+┌─────────────────────────────────┐
+│      Frontend (Vue 3)            │
+│  - Composants Sections           │
+│  - Composants Widgets            │
+│  - Rendu via Inertia.js          │
+└────────────┬────────────────────┘
+             │
+    ┌────────▼────────┐
+    │  Laravel Backend │
+    │  - Routes dyn   │
+    │  - API REST     │
+    │  - Admin SPA    │
+    └────────┬────────┘
+             │
+    ┌────────▼────────┐
+    │  Base de Données │
+    │  - Sections      │
+    │  - Pages         │
+    │  - Contenus      │
+    └──────────────────┘
+```
+
+### 8.2 Flux de création d'une page
+
+1. **Créer les sections** via CLI ou admin
+   ```bash
+   creopse section add HeroBanner FeaturesGrid ContactForm
+   ```
+
+2. **Développer les composants** Vue (`resources/js/components/sections/`)
+   - Importer `SectionProps`, `useHelper()`, `useContent()`
+   - Récupérer les données avec `getSectionRootData()` et `getSectionData()`
+
+3. **Ajouter du contenu** via l'admin Creopse (`/creopse`)
+   - Créer une page et ordonner les sections
+   - Saisir le contenu de chaque section
+
+4. **Vérifier le rendu** via les routes dynamiques
+   - Les routes `/page-path` sont générées automatiquement
+   - Le frontend charge et affiche les sections correspondantes
+
+### 8.3 Points clés à retenir
+
+| Concept | Description |
+|---------|-------------|
+| **Section** | Composant réutilisable avec structure de données et rendu |
+| **Page** | Pile ordonnée de sections avec contenu unique par instance |
+| **Widget** | Mini-composant (formulaire, bouton) intégrable dans les sections |
+| **Localisation** | Contenu multilingue géré automatiquement (`tr()`) |
+| **Rendu HTML** | `rHtml()` pour sécuriser et formater l'HTML enrichi WYSIWYG |
+| **API REST** | Accessible en parallèle pour intégrations externes |
+| **CLI Creopse** | Génère composants + entrées BD en une commande |
+| **Admin SPA** | Interface accessible à `/creopse` après installation |
+
+### 8.4 Configuration essentielle
+
+**`config/creopse.php`** (backend)
+- Modèle utilisateur pour authentification
+- Limites de débit API
+- Compression automatique des réponses
+
+**`public/creopse/config.jsonc`** (admin frontend)
+- URL de base de l'API (`apiBaseUrl`)
+- Mode développement (`forceDevMode`)
+
+### 8.5 Prochaines étapes recommandées
+
+- ✅ Vérifier l'installation : `php artisan tinker` → `\App\Models\Section::count()`
+- ✅ Accéder à l'admin : `http://localhost:8000/creopse`
+- ✅ Créer les sections métier : `creopse section add [noms]`
+- ✅ Développer les composants Vue correspondants
+- ✅ Configurer le routage et les menus
+- ✅ Tester l'API REST : `curl http://localhost:8000/api/pages`
