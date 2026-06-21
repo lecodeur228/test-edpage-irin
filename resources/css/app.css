@@ -1,12 +1,11 @@
 @import 'tailwindcss' prefix(tw);
 @import 'ckeditor5-content.css';
 
-@layer utilities {
-  .sticky {
-    position: unset;
-  }
+/* Do not override Bootstrap Voltz classes (.collapse, .sticky, etc.) */
 
-  .collapse {
-    visibility: unset;
-  }
+.preloader.is-hidden {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }

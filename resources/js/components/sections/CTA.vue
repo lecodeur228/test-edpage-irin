@@ -6,31 +6,38 @@
   const { getSectionRootData } = useContent()
   const { tr, rHtml } = useHelper()
 
-  const cta = getSectionRootData(props.sectionKey)
+  const root = getSectionRootData(props.sectionKey)
 </script>
 
 <template>
   <div class="cta1-aection-area">
     <div class="container">
       <div class="row">
-        <div class="col-lg-12">
+        <div class="col-xl-12">
           <div class="cta-bg-area">
+            <img src="/assets/img/elements/elements4.png" alt="" class="elements4">
             <div class="row align-items-center">
-              <div class="col-lg-6">
+              <div class="col-xl-6">
                 <div class="cta-heading">
-                  <h2>{{ tr(cta?.title) || 'Ready to Power Your Future?' }}</h2>
+                  <h2 data-aos="zoom-in" data-aos-duration="800">{{ tr(root?.title) || 'Secure Reliable Power for Your Home and Business!' }}</h2>
                   <div class="space16"></div>
-                  <p v-html="rHtml(cta?.description) || 'Talk with our team about your next energy project.'"></p>
+                  <p data-aos="zoom-in" data-aos-duration="900" v-html="rHtml(root?.description)"></p>
                   <div class="space32"></div>
-                  <a :href="cta?.button_link || '/contact'" class="vl-btn1">
-                    {{ tr(cta?.button_text) || 'Contact Us' }}
-                    <i class="fa-solid fa-arrow-right"></i>
-                  </a>
+                  <div class="form-area" data-aos="zoom-in" data-aos-duration="1100">
+                    <form>
+                      <input type="text" placeholder="Your Email Address">
+                      <button class="vl-btn1" type="submit">
+                        {{ tr(root?.button_text) || 'Subscribe' }}
+                        <i class="fa-solid fa-arrow-right"></i>
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
-              <div class="col-lg-6">
+              <div class="col-xl-1"></div>
+              <div class="col-xl-5" data-aos="zoom-in" data-aos-duration="1000">
                 <div class="cta-images-area text-end">
-                  <img :src="cta?.image || '/assets/img/all-images/cta/cta-img1.png'" :alt="tr(cta?.title) || 'Voltz CTA'">
+                  <img :src="root?.image || root?.background_image || '/assets/img/all-images/cta/cta-img1.png'" :alt="tr(root?.title) || 'Voltz CTA'">
                 </div>
               </div>
             </div>

@@ -4,61 +4,89 @@
 
   const props = defineProps<SectionProps>()
 
-  const { getSectionRootData, getSectionData } = useContent()
+  const { getSectionRootData } = useContent()
   const { tr, rHtml } = useHelper()
 
-  const contact = getSectionRootData(props.sectionKey)
-  const rawData = getSectionData(props.sectionKey)
-  const contactInfo = computed(() => contact?.contact_info || rawData || [])
+  const root = getSectionRootData(props.sectionKey)
 
-  const formData = ref({ name: '', email: '', phone: '', message: '' })
+  const formData = ref({ name: '', email: '', subject: '', message: '' })
 
   const submitForm = () => {
-    formData.value = { name: '', email: '', phone: '', message: '' }
+    formData.value = { name: '', email: '', subject: '', message: '' }
   }
 </script>
 
 <template>
-  <div class="contact-widget-sec sp1">
+  <div id="contact" class="contact1 sp1">
     <div class="container">
       <div class="row">
-        <div class="col-xl-6 m-auto">
+        <div class="col-xl-8 m-auto">
           <div class="heading1 text-center space-margin60">
             <h5 class="vl-section-subtitle" data-aos="zoom-in-up" data-aos-duration="900">
               <img src="/assets/img/elements/elements5.png" alt="">
-              <span>{{ tr(contact?.subtitle) || 'Contact Us' }}</span>
+              <span>{{ tr(root?.subtitle) || 'CONTACT US' }}</span>
               <img src="/assets/img/elements/elements6.png" alt="">
             </h5>
             <div class="space16"></div>
-            <h2 class="vl-section-title" data-aos="zoom-in-up" data-aos-duration="1000">{{ tr(contact?.title) || 'Get in Touch' }}</h2>
-            <div class="space16"></div>
-            <p v-if="contact?.description" v-html="rHtml(contact.description)"></p>
+            <h2 class="vl-section-title" data-aos="zoom-in-up" data-aos-duration="1000">
+              {{ tr(root?.title) || 'Your Clean Energy Journey Begins Now' }}
+            </h2>
           </div>
         </div>
       </div>
-      <div class="row align-items-start">
-        <div class="col-lg-5">
-          <div class="contact-info-area">
-            <div v-for="(info, index) in contactInfo" :key="index" class="contact-auhtor-boxarea">
-              <div class="icons"><i :class="info.icon || 'fa-solid fa-location-dot'"></i></div>
-              <div class="text">
-                <h4>{{ tr(info.title) }}</h4>
-                <a :href="info.href || '#'">{{ tr(info.content) }}</a>
-              </div>
-            </div>
+      <div class="row">
+        <div class="col-xl-6" data-aos="zoom-in-up" data-aos-duration="1000">
+          <div class="contact-maps-area">
+            <iframe
+              :src="root?.map_embed || 'https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d4506257.120552435!2d88.67021924228865!3d21.954385721237916!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sbd!4v1704088968016!5m2!1sen!2sbd'"
+              width="600"
+              height="450"
+              style="border:0;"
+              allowfullscreen
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade" />
           </div>
         </div>
-        <div class="col-lg-7">
-          <div class="contact-form-area">
-            <form @submit.prevent="submitForm">
-              <div class="row">
-                <div class="col-lg-6"><input v-model="formData.name" type="text" placeholder="Your Name" required></div>
-                <div class="col-lg-6"><input v-model="formData.email" type="email" placeholder="Email Address" required></div>
-                <div class="col-lg-12"><input v-model="formData.phone" type="tel" placeholder="Phone Number"></div>
-                <div class="col-lg-12"><textarea v-model="formData.message" placeholder="Your Message" required></textarea></div>
-                <div class="col-lg-12"><button type="submit" class="vl-btn1">Send Message <i class="fa-solid fa-arrow-right"></i></button></div>
-              </div>
-            </form>
+        <div class="col-xl-6">
+          <div class="contact-widget-area heading3">
+            <h4 data-aos="fade-left" data-aos-duration="900">{{ tr(root?.form_title) || 'Send us a Message' }}</h4>
+            <div class="space12"></div>
+            <p data-aos="fade-left" data-aos-duration="1100" v-html="rHtml(root?.description)"></p>
+            <div class="space12"></div>
+            <div class="contact-boxarea" data-aos="fade-left" data-aos-duration="1200">
+              <form @submit.prevent="submitForm">
+                <div class="row">
+                  <div class="col-xl-6 col-md-6">
+                    <div class="input-area">
+                      <input v-model="formData.name" type="text" placeholder="Full Name" required>
+                    </div>
+                  </div>
+                  <div class="col-xl-6 col-md-6">
+                    <div class="input-area">
+                      <input v-model="formData.email" type="email" placeholder="Email" required>
+                    </div>
+                  </div>
+                  <div class="col-xl-12 col-md-12">
+                    <div class="input-area">
+                      <input v-model="formData.subject" type="text" placeholder="Subject">
+                    </div>
+                  </div>
+                  <div class="col-xl-12 col-md-12">
+                    <div class="input-area">
+                      <textarea v-model="formData.message" placeholder="How can we help you?" required></textarea>
+                    </div>
+                  </div>
+                  <div class="col-xl-12 col-md-12">
+                    <div class="input-area">
+                      <button type="submit" class="vl-btn1">
+                        Send Now
+                        <i class="fa-solid fa-arrow-right"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>

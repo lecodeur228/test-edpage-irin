@@ -2,18 +2,21 @@
 
 namespace Database\Seeders;
 
-use Creopse\Creopse\Database\Seeders\DatabaseSeeder as CreopseDatabaseSeeder;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
+     *
+     * Creopse fournit admin, utilisateur et structure de base.
+     * VoltzTemplateSeeder injecte tout le contenu du site (12 sections Home + menus).
      */
     public function run(): void
     {
         $this->call([
-            CreopseDatabaseSeeder::class,
+            \Creopse\Creopse\Database\Seeders\DatabaseSeeder::class,
             VoltzTemplateSeeder::class,
         ]);
     }

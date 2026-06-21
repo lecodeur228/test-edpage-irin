@@ -25,17 +25,16 @@
     <meta name="twitter:card" content="summary_large_image" />
     @endif
 
-    <!-- Put your styles here -->
-       <!-- Put your styles here -->
-    <link rel="stylesheet" href="{{ asset('assets/css/plugins/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/plugins/aos.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/plugins/fontawesome.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/plugins/magnific-popup.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/plugins/slick-slider.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/plugins/sidebar.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/plugins/nice-select.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/plugins/swiper-slider.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
+    <!-- Voltz template styles -->
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/aos.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/fontawesome.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/magnific-popup.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/slick-slider.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/sidebar.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/nice-select.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/swiper-slider.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}" />
 
     <!-- RSS Feed -->
     @include('feed::links')
@@ -45,9 +44,12 @@
     @inertiaHead
 </head>
 <body>
+    <!-- jQuery first so Voltz plugins are ready before Vue mounts -->
+    <script src="{{ asset('assets/js/plugins/jquery-3-7-1.min.js') }}"></script>
+
     @inertia
 
-    <script src="{{ asset('assets/js/plugins/jquery-3-7-1.min.js') }}"></script>
+    <!-- Voltz template scripts -->
     <script src="{{ asset('assets/js/plugins/bootstrap.min.js') }}"></script>
     <script src="{{ asset('assets/js/plugins/fontawesome.js') }}"></script>
     <script src="{{ asset('assets/js/plugins/aos.js') }}"></script>

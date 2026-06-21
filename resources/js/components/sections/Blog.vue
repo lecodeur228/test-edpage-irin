@@ -6,9 +6,9 @@
   const { getSectionRootData, getSectionData } = useContent()
   const { tr, rHtml } = useHelper()
 
-  const blog = getSectionRootData(props.sectionKey)
-  const rawData = getSectionData(props.sectionKey)
-  const posts = computed(() => blog?.posts || rawData || [])
+  const root = getSectionRootData(props.sectionKey)
+  const sectionData = getSectionData(props.sectionKey)
+  const posts = computed(() => sectionData?.posts ?? [])
 </script>
 
 <template>
@@ -19,12 +19,12 @@
           <div class="heading1 text-center space-margin60">
             <h5 class="vl-section-subtitle" data-aos="zoom-in-up" data-aos-duration="900">
               <img src="/assets/img/elements/elements5.png" alt="">
-              <span>{{ tr(blog?.subtitle) || 'Blog & News' }}</span>
+              <span>{{ tr(root?.subtitle) || 'BLOG & News' }}</span>
               <img src="/assets/img/elements/elements6.png" alt="">
             </h5>
             <div class="space16"></div>
             <h2 class="vl-section-title" data-aos="zoom-in-up" data-aos-duration="1000">
-              {{ tr(blog?.title) || 'Smarter Power Brighter Future!' }}
+              {{ tr(root?.title) || 'Smarter Power Brighter Future!' }}
             </h2>
           </div>
         </div>

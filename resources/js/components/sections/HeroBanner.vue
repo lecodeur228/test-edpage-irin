@@ -3,23 +3,29 @@
 
   const props = defineProps<SectionProps>()
 
-  const { getSectionRootData } = useContent()
+  const { getSectionRootData, getSectionData } = useContent()
   const { tr, rHtml } = useHelper()
 
-  const hero = getSectionRootData(props.sectionKey)
-  const slides = computed(() => hero?.slides || [
-    {
-      subtitle: hero?.subtitle,
-      title: hero?.title,
-      description: hero?.description,
-      image: hero?.image || '/assets/img/all-images/hero/hero-img1.png',
-      background_image: hero?.background_image || '/assets/img/all-images/bg/hero-bg1.png',
-      primary_text: hero?.cta_text,
-      primary_link: hero?.cta_link,
-      secondary_text: hero?.secondary_cta_text,
-      secondary_link: hero?.secondary_cta_link,
-    },
-  ])
+  const root = getSectionRootData(props.sectionKey)
+  const sectionData = getSectionData(props.sectionKey)
+  const slides = computed(() => {
+    if (sectionData?.slides?.length) {
+      return sectionData.slides
+    }
+    if (!root) {
+      return []
+    }
+    return [{
+      title: root.title,
+      description: root.description,
+      image: root.image,
+      background_image: root.background_image,
+      primary_text: root.cta_text,
+      primary_link: root.cta_link,
+      secondary_text: root.secondary_cta_text,
+      secondary_link: root.secondary_cta_link,
+    }]
+  })
 </script>
 
 <template>
@@ -29,18 +35,12 @@
         <img :src="slide.background_image || '/assets/img/all-images/bg/hero-bg1.png'" alt="" class="hero-bg1">
         <div class="container">
           <div class="row align-items-center">
-            <div class="col-lg-6">
+            <div class="col-xl-7">
               <div class="hero1-heading">
-                <h5 class="vl-section-subtitle">
-                  <img src="/assets/img/elements/elements5.png" alt="">
-                  <span>{{ tr(slide.subtitle) || 'Clean Energy Solutions' }}</span>
-                  <img src="/assets/img/elements/elements6.png" alt="">
-                </h5>
+                <h1>{{ tr(slide.title) || 'Harness the Future Of Electricity Today!' }}</h1>
                 <div class="space16"></div>
-                <h1>{{ tr(slide.title) || 'Power Your Future with Voltz' }}</h1>
-                <div class="space16"></div>
-                <p v-html="rHtml(slide.description) || 'Renewable energy solutions for a sustainable tomorrow.'"></p>
-                <div class="space32"></div>
+                <p v-html="rHtml(slide.description)"></p>
+                <div class="space38"></div>
                 <div class="btn-area1">
                   <a :href="slide.primary_link || '/services'" class="vl-btn1">
                     {{ tr(slide.primary_text) || 'Explore Our Services' }}
@@ -53,8 +53,9 @@
                 </div>
               </div>
             </div>
-            <div class="col-lg-6">
-              <div class="hero-images-area">
+            <div class="col-xl-5">
+              <div class="main-images">
+                <img src="/assets/img/elements/elements1.png" alt="" class="elements1">
                 <div class="img1">
                   <img :src="slide.image || '/assets/img/all-images/hero/hero-img1.png'" :alt="tr(slide.title) || 'Voltz hero'">
                 </div>
