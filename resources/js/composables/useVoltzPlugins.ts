@@ -14,6 +14,46 @@ function unslick($: any, selector: string) {
   }
 }
 
+function initProgressBar($: any) {
+  const progressPath = document.querySelector('.progress-wrap path') as SVGPathElement | null
+  if (!progressPath) {
+    return
+  }
+
+  const pathLength = progressPath.getTotalLength()
+  progressPath.style.transition = progressPath.style.webkitTransition = 'none'
+  progressPath.style.strokeDasharray = `${pathLength} ${pathLength}`
+  progressPath.style.strokeDashoffset = `${pathLength}`
+  progressPath.getBoundingClientRect()
+  progressPath.style.transition = progressPath.style.webkitTransition = 'stroke-dashoffset 10ms linear'
+
+  const updateProgress = () => {
+    const scroll = $(window).scrollTop()
+    const height = $(document).height() - $(window).height()
+    const progress = pathLength - (scroll * pathLength) / height
+    progressPath.style.strokeDashoffset = `${progress}`
+  }
+
+  updateProgress()
+  $(window).off('scroll.voltzProgress').on('scroll.voltzProgress', updateProgress)
+
+  const offset = 50
+  const duration = 550
+  $(window).off('scroll.voltzProgressWrap').on('scroll.voltzProgressWrap', function (this: Window) {
+    if ($(this).scrollTop() > offset) {
+      $('.progress-wrap').addClass('active-progress')
+    } else {
+      $('.progress-wrap').removeClass('active-progress')
+    }
+  }).trigger('scroll')
+
+  $('.progress-wrap').off('click.voltz').on('click.voltz', (event: Event) => {
+    event.preventDefault()
+    $('html, body').animate({ scrollTop: 0 }, duration)
+    return false
+  })
+}
+
 function initSlickSliders($: any) {
   unslick($, '.hero-main-slider-widget')
   if ($('.hero-main-slider-widget').children().length) {
@@ -195,6 +235,7 @@ export function initVoltzPlugins() {
     initMobileMenu($)
     bindVoltzUiHandlers($)
     initStickyHeader($)
+    initProgressBar($)
     initSlickSliders($)
     initSwiperSliders()
     initCounters($)
@@ -214,5 +255,13 @@ export function useVoltzPlugins() {
     setTimeout(() => scheduleInit(attempt + 1), 100)
   }
 
-  return { scheduleInit }
+  const scheduleInitAfterPaint = async () => {
+    await nextTick()
+    scheduleInit()
+    requestAnimationFrame(() => scheduleInit())
+    setTimeout(() => scheduleInit(), 350)
+    setTimeout(() => scheduleInit(), 1200)
+  }
+
+  return { scheduleInit, scheduleInitAfterPaint }
 }

@@ -7,13 +7,13 @@
   import { onMounted } from 'vue'
 
   const { initializeData } = useDataloader()
-  const { scheduleInit } = useVoltzPlugins()
+  const { scheduleInitAfterPaint } = useVoltzPlugins()
 
   onMounted(() => {
     hideVoltzPreloader()
     initializeData()
-    scheduleInit()
-    router.on('finish', () => scheduleInit())
+    scheduleInitAfterPaint()
+    router.on('finish', () => scheduleInitAfterPaint())
   })
 </script>
 

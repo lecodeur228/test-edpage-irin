@@ -12,7 +12,7 @@
 </script>
 
 <template>
-  <section class="testimonials-2 sp6" style="background-image: url(/assets/img/all-images/bg/hero-bg1.png); background-position: center; background-repeat: no-repeat; background-size: cover;">
+  <section class="testimonials-2 sp6">
     <div class="container">
       <div class="row">
         <div class="col-xl-6 m-auto text-center">

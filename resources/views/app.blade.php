@@ -43,7 +43,7 @@
     @routes
     @inertiaHead
 </head>
-<body>
+<body class="voltz-template">
     <!-- jQuery first so Voltz plugins are ready before Vue mounts -->
     <script src="{{ asset('assets/js/plugins/jquery-3-7-1.min.js') }}"></script>
 
@@ -60,6 +60,6 @@
     <script src="{{ asset('assets/js/plugins/sidebar.js') }}"></script>
     <script src="{{ asset('assets/js/plugins/slick-slider.js') }}"></script>
     <script src="{{ asset('assets/js/plugins/swiper-slider.js') }}"></script>
-    <script src="{{ asset('assets/js/main.js') }}"></script>
+    {{-- main.js init is handled in useVoltzPlugins after Vue/Inertia mount --}}
 </body>
 </html>
