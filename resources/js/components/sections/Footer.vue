@@ -5,6 +5,7 @@
 
   const { getSectionRootData, getSectionData } = useContent()
   const { tr, rHtml } = useHelper()
+  const { resolveMenuPath } = useVoltzNavigate()
 
   const root = getSectionRootData(props.sectionKey)
   const sectionData = getSectionData(props.sectionKey)
@@ -39,7 +40,7 @@
             <h3>{{ tr(root?.quick_links_title) || 'Quick Links' }}</h3>
             <ul>
               <li v-for="(link, index) in quickLinks" :key="index">
-                <a :href="link.url || '/'">{{ tr(link.title) }}</a>
+                <VoltzLink :href="resolveMenuPath(link.url || '/')">{{ tr(link.title) }}</VoltzLink>
               </li>
             </ul>
           </div>
@@ -51,7 +52,7 @@
             <h3>{{ tr(root?.service_links_title) || 'Services' }}</h3>
             <ul>
               <li v-for="(link, index) in serviceLinks" :key="index">
-                <a :href="link.url || '/services'">{{ tr(link.title) }}</a>
+                <VoltzLink :href="link.url || '/#services'">{{ tr(link.title) }}</VoltzLink>
               </li>
             </ul>
           </div>

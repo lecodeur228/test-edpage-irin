@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
      * Seed the application's database.
      *
      * Creopse fournit admin, utilisateur et structure de base.
-     * VoltzTemplateSeeder injecte tout le contenu du site (12 sections Home + menus).
+     * VoltzTemplateSeeder injecte tout le contenu du site (Home, About, menus).
      */
     public function run(): void
     {

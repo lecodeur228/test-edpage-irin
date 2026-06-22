@@ -12,7 +12,7 @@
 </script>
 
 <template>
-  <div class="faq1 sp1">
+  <div id="faq" class="faq1 sp1">
     <div class="container">
       <div class="row">
         <div class="col-xl-6 m-auto">

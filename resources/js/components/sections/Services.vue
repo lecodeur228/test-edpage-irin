@@ -12,7 +12,7 @@
 </script>
 
 <template>
-  <div class="service1 sp2">
+  <div id="services" class="service1 sp2">
     <div class="container">
       <div class="row">
         <div class="col-xl-5 m-auto">
@@ -44,14 +44,14 @@
             </div>
             <div class="space16"></div>
             <div class="content-area">
-              <a :href="item.link || '/services'" class="title">{{ tr(item.title) }}</a>
+              <VoltzLink :href="item.link || '/#services'" class="title">{{ tr(item.title) }}</VoltzLink>
               <div class="space16"></div>
               <p v-html="rHtml(item.description)"></p>
               <div class="space24"></div>
-              <a :href="item.link || '/services'" class="readmore">
+              <VoltzLink :href="item.link || '/#services'" class="readmore">
                 {{ tr(item.link_text) || 'Learn More' }}
                 <i class="fa-solid fa-arrow-right"></i>
-              </a>
+              </VoltzLink>
             </div>
           </div>
         </div>

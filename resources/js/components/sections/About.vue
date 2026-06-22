@@ -39,7 +39,7 @@
                   <img :src="item.icon || '/assets/img/icons/a-icons1.svg'" alt="">
                 </div>
                 <div class="content-area">
-                  <a :href="item.link || '/about'">{{ tr(item.title) }}</a>
+                  <VoltzLink :href="item.link || '/about'">{{ tr(item.title) }}</VoltzLink>
                   <div class="space16"></div>
                   <p v-html="rHtml(item.text)"></p>
                 </div>
@@ -48,10 +48,10 @@
             </template>
             <div class="space38"></div>
             <div class="btn-area1" data-aos="fade-left" data-aos-duration="1300">
-              <a :href="root?.button_link || '/about'" class="vl-btn1">
+              <VoltzLink :href="root?.button_link || '/about'" class="vl-btn1">
                 {{ tr(root?.button_text) || 'Learn More' }}
                 <i class="fa-solid fa-arrow-right"></i>
-              </a>
+              </VoltzLink>
             </div>
           </div>
         </div>

@@ -47,7 +47,7 @@
                   <p v-html="rHtml(item.content)"></p>
                   <div class="space32"></div>
                   <div class="text">
-                    <a href="/team">{{ tr(item.author_name) }}</a>
+                    <VoltzLink href="/about">{{ tr(item.author_name) }}</VoltzLink>
                     <div class="space12"></div>
                     <p>{{ tr(item.author_role) }}</p>
                   </div>

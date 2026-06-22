@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { navigateFromHref } from '@/composables/useVoltzNavigate'
 
 let testimonialThumbSwiper: { destroy: (a?: boolean, b?: boolean) => void } | null = null
 let testimonialMainSwiper: { destroy: (a?: boolean, b?: boolean) => void } | null = null
@@ -93,6 +94,27 @@ function initSlickSliders($: any) {
       ],
     })
   }
+
+  unslick($, '.testimonai2-slider-area')
+  if ($('.testimonai2-slider-area').children().length) {
+    $('.testimonai2-slider-area').slick({
+      slidesToShow: 2,
+      slidesToScroll: 1,
+      dots: true,
+      arrows: false,
+      centerMode: false,
+      focusOnSelect: true,
+      loop: true,
+      autoplay: true,
+      autoplaySpeed: 2000,
+      infinite: true,
+      responsive: [
+        { breakpoint: 1024, settings: { slidesToShow: 2, slidesToScroll: 1, infinite: true } },
+        { breakpoint: 769, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+        { breakpoint: 480, settings: { slidesToShow: 1, slidesToScroll: 1 } },
+      ],
+    })
+  }
 }
 
 function initMobileMenu($: any) {
@@ -147,6 +169,31 @@ function bindVoltzUiHandlers($: any) {
     $('.body-overlay').removeClass('active')
     $('.hamburger_menu').removeClass('active')
   })
+
+  $(document).off('click.voltz', '.vl-offcanvas-menu a[href^="/"]').on('click.voltz', '.vl-offcanvas-menu a[href^="/"]', function (this: HTMLAnchorElement, e: Event) {
+    if (e.defaultPrevented) {
+      return
+    }
+
+    const href = this.getAttribute('href') || ''
+    if (!href || href === '#' || /^(mailto:|tel:)/i.test(href)) {
+      return
+    }
+
+    const mouseEvent = e as MouseEvent
+    if (mouseEvent.metaKey || mouseEvent.ctrlKey || mouseEvent.shiftKey || mouseEvent.altKey || mouseEvent.button !== 0) {
+      return
+    }
+
+    e.preventDefault()
+    navigateFromHref(href)
+  })
+}
+
+function initMagnificPopup($: any) {
+  if ($('.popup-youtube').length > 0 && typeof $.fn.magnificPopup === 'function') {
+    $('.popup-youtube').magnificPopup({ type: 'iframe' })
+  }
 }
 
 function initSwiperSliders() {
@@ -237,6 +284,7 @@ export function initVoltzPlugins() {
     initStickyHeader($)
     initProgressBar($)
     initSlickSliders($)
+    initMagnificPopup($)
     initSwiperSliders()
     initCounters($)
     initAos()

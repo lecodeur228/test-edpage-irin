@@ -12,7 +12,7 @@
 </script>
 
 <template>
-  <div class="vl-blog-1-area sp2">
+  <div id="blog" class="vl-blog-1-area sp2">
     <div class="container">
       <div class="row">
         <div class="col-xl-6 m-auto">
@@ -43,12 +43,12 @@
                 </ul>
               </div>
               <div class="space18"></div>
-              <h4 class="vl-blog-1-title"><a :href="post.link || '/blog'">{{ tr(post.title) }}</a></h4>
+              <h4 class="vl-blog-1-title"><VoltzLink :href="post.link || '/#blog'">{{ tr(post.title) }}</VoltzLink></h4>
               <div class="space12"></div>
               <p v-html="rHtml(post.excerpt)"></p>
               <div class="space24"></div>
               <div class="vl-blog-1-icon">
-                <a :href="post.link || '/blog'" class="readmore">Read More <i class="fa-solid fa-arrow-right"></i></a>
+                <VoltzLink :href="post.link || '/#blog'" class="readmore">Read More <i class="fa-solid fa-arrow-right"></i></VoltzLink>
               </div>
             </div>
           </div>

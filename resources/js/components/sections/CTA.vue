@@ -24,12 +24,12 @@
                   <p data-aos="zoom-in" data-aos-duration="900" v-html="rHtml(root?.description)"></p>
                   <div class="space32"></div>
                   <div class="form-area" data-aos="zoom-in" data-aos-duration="1100">
-                    <form>
+                    <form @submit.prevent>
                       <input type="text" placeholder="Your Email Address">
-                      <button class="vl-btn1" type="submit">
+                      <VoltzLink :href="root?.button_link || '/#contact'" class="vl-btn1">
                         {{ tr(root?.button_text) || 'Subscribe' }}
                         <i class="fa-solid fa-arrow-right"></i>
-                      </button>
+                      </VoltzLink>
                     </form>
                   </div>
                 </div>

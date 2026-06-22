@@ -33,7 +33,7 @@
             <div class="icons">
               <img :src="item.icon || `/assets/img/icons/ot-icons${index + 1}.svg`" alt="">
             </div>
-            <a :href="item.link || '/services'" class="title">{{ tr(item.title) }}</a>
+            <VoltzLink :href="item.link || '/#services'" class="title">{{ tr(item.title) }}</VoltzLink>
           </div>
         </div>
       </div>

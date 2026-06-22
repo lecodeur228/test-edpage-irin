@@ -27,9 +27,9 @@
     <div class="slide-bar slide-bar1">
       <div class="sidebar-info">
         <div class="sidebar-logo">
-          <a href="/">
+          <VoltzLink href="/">
             <img src="/assets/img/logo/logo1.png" :alt="appName">
-          </a>
+          </VoltzLink>
           <div class="close-mobile-menu">
             <a href="#"><i class="fa-solid fa-xmark"></i></a>
           </div>
@@ -40,7 +40,7 @@
         </div>
         <div class="space32"></div>
         <div class="btn-area">
-          <a href="/contact" class="vl-btn1">Get in touch now <i class="fa-solid fa-arrow-right"></i></a>
+          <VoltzLink href="/#contact" class="vl-btn1">Get in touch now <i class="fa-solid fa-arrow-right"></i></VoltzLink>
         </div>
         <div class="space40"></div>
         <div class="social-link-area">

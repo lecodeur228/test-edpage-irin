@@ -12,7 +12,7 @@
 </script>
 
 <template>
-  <div class="project1 sp1">
+  <div id="projects" class="project1 sp1">
     <div class="container">
       <div class="row">
         <div class="col-xl-6 m-auto">
@@ -40,10 +40,10 @@
                 <div class="content-p-area">
                   <span>{{ tr(item.category) || 'Edge energy solutions' }}</span>
                   <div class="space12"></div>
-                  <a :href="item.link || '/projects'" class="title">{{ tr(item.title) }}</a>
+                  <VoltzLink :href="item.link || '/#projects'" class="title">{{ tr(item.title) }}</VoltzLink>
                 </div>
                 <div class="arrow">
-                  <a :href="item.link || '/projects'"><i class="fa-solid fa-arrow-right"></i></a>
+                  <VoltzLink :href="item.link || '/#projects'"><i class="fa-solid fa-arrow-right"></i></VoltzLink>
                 </div>
               </div>
             </div>

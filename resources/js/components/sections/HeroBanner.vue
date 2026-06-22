@@ -42,14 +42,14 @@
                 <p v-html="rHtml(slide.description)"></p>
                 <div class="space38"></div>
                 <div class="btn-area1">
-                  <a :href="slide.primary_link || '/services'" class="vl-btn1">
+                  <VoltzLink :href="slide.primary_link || '/#services'" class="vl-btn1">
                     {{ tr(slide.primary_text) || 'Explore Our Services' }}
                     <i class="fa-solid fa-arrow-right"></i>
-                  </a>
-                  <a :href="slide.secondary_link || '/about'" class="h-btn1">
+                  </VoltzLink>
+                  <VoltzLink :href="slide.secondary_link || '/about'" class="h-btn1">
                     {{ tr(slide.secondary_text) || 'More About Us' }}
                     <i class="fa-solid fa-arrow-right"></i>
-                  </a>
+                  </VoltzLink>
                 </div>
               </div>
             </div>

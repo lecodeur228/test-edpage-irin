@@ -9,6 +9,8 @@
 
   const root = getSectionRootData(props.sectionKey)
 
+  const sectionClass = computed(() => root?.layout === 'contact2' ? 'contact2 sp1' : 'contact1 sp1')
+
   const formData = ref({ name: '', email: '', subject: '', message: '' })
 
   const submitForm = () => {
@@ -17,7 +19,7 @@
 </script>
 
 <template>
-  <div id="contact" class="contact1 sp1">
+  <div id="contact" :class="sectionClass">
     <div class="container">
       <div class="row">
         <div class="col-xl-8 m-auto">

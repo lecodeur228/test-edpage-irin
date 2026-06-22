@@ -1,4 +1,5 @@
 import App from './App.vue'
+import VoltzLink from '@/components/VoltzLink.vue'
 
 import pinia from '@/stores'
 
@@ -18,6 +19,12 @@ createInertiaApp({
   {
     const pages = import.meta.glob('./pages/**/*.vue', { eager: true })
     const page: any = pages[`./pages/${name}.vue`]
+
+    if (!page) {
+      console.error(`[Inertia] Page not found: ${name}`)
+      return pages['./pages/NotFound.vue']
+    }
+
     page.default.layout = App
     return page
   },
@@ -80,6 +87,7 @@ createInertiaApp({
       })
       .component('ContentIcon', Icon)
       .component('Link', Link)
+      .component('VoltzLink', VoltzLink)
       .mount(el)
   },
 })

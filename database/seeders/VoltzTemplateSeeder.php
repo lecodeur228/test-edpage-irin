@@ -45,26 +45,15 @@ class VoltzTemplateSeeder extends Seeder
     {
         $this->seedAppInformation();
 
-        $sections = $this->sectionsDefinition();
+        $homeSections = $this->sectionsDefinition();
+        $aboutSections = $this->aboutPageSectionsDefinition();
 
-        $page = Page::updateOrCreate(
-            ['name' => 'Home'],
-            [
-                'title' => $this->t('Home', 'Accueil'),
-                'content' => $this->t(
-                    'KYA-Energy Group — solar energy solutions in Togo and West Africa',
-                    'KYA-Energy Group — solutions solaires au Togo et en Afrique de l Ouest'
-                ),
-                'position' => 0,
-                'sections_order' => array_keys($sections),
-                'sections_disabled' => [],
-            ]
-        );
+        foreach (array_merge($homeSections, $aboutSections) as $name => $definition) {
+            if ($name === '__meta' || ! isset($definition['data_structure'])) {
+                continue;
+            }
 
-        $syncPayload = [];
-
-        foreach ($sections as $name => $definition) {
-            $section = Section::updateOrCreate(
+            Section::updateOrCreate(
                 ['name' => $name],
                 [
                     'title' => $definition['title'],
@@ -73,6 +62,35 @@ class VoltzTemplateSeeder extends Seeder
                     'settings_structure' => [],
                 ]
             );
+        }
+
+        $homePage = $this->seedPage('Home', 0, $homeSections);
+        $aboutPage = $this->seedPage('About', 1, $aboutSections);
+
+        $this->seedMenus($homePage, $aboutPage);
+    }
+
+    private function seedPage(string $name, int $position, array $sections): Page
+    {
+        $page = Page::updateOrCreate(
+            ['name' => $name],
+            [
+                'title' => $sections['__meta']['title'] ?? $this->t($name),
+                'content' => $sections['__meta']['content'] ?? $this->t($name),
+                'position' => $position,
+                'sections_order' => array_values(array_filter(array_keys($sections), fn ($k) => $k !== '__meta')),
+                'sections_disabled' => [],
+            ]
+        );
+
+        $syncPayload = [];
+
+        foreach ($sections as $sectionName => $definition) {
+            if ($sectionName === '__meta') {
+                continue;
+            }
+
+            $section = Section::where('name', $sectionName)->firstOrFail();
 
             PageSection::updateOrCreate(
                 [
@@ -97,10 +115,9 @@ class VoltzTemplateSeeder extends Seeder
             ];
         }
 
-        // Remplace toutes les sections de Home (retire Content Creopse par défaut, etc.)
         $page->sections()->sync($syncPayload);
 
-        $this->seedMenus($page);
+        return $page;
     }
 
     private function seedAppInformation(): void
@@ -123,7 +140,7 @@ class VoltzTemplateSeeder extends Seeder
         }
     }
 
-    private function seedMenus(Page $page): void
+    private function seedMenus(Page $homePage, Page $aboutPage): void
     {
         $location = MenuLocation::updateOrCreate(
             ['name' => 'main'],
@@ -144,20 +161,20 @@ class VoltzTemplateSeeder extends Seeder
         $menu->items()->delete();
 
         $items = [
-            ['title' => $this->t('Home', 'Accueil'), 'path' => '/', 'position' => 0],
-            ['title' => $this->t('About Us', 'A propos'), 'path' => '/about', 'position' => 1],
-            ['title' => $this->t('Services', 'Services'), 'path' => '/services', 'position' => 2],
-            ['title' => $this->t('Projects', 'Projets'), 'path' => '/projects', 'position' => 3],
-            ['title' => $this->t('Blog', 'Blog'), 'path' => '/blog', 'position' => 4],
-            ['title' => $this->t('Contact Us', 'Contact'), 'path' => '/#contact', 'position' => 5],
-            ['title' => $this->t('FAQ', 'FAQ'), 'path' => '/faq', 'position' => 6],
+            ['title' => $this->t('Home', 'Accueil'), 'path' => '/', 'page' => $homePage, 'position' => 0],
+            ['title' => $this->t('About Us', 'A propos'), 'path' => '/about', 'page' => $aboutPage, 'position' => 1],
+            ['title' => $this->t('Services', 'Services'), 'path' => '/#services', 'page' => $homePage, 'position' => 2],
+            ['title' => $this->t('Projects', 'Projets'), 'path' => '/#projects', 'page' => $homePage, 'position' => 3],
+            ['title' => $this->t('Blog', 'Blog'), 'path' => '/#blog', 'page' => $homePage, 'position' => 4],
+            ['title' => $this->t('Contact Us', 'Contact'), 'path' => '/#contact', 'page' => $homePage, 'position' => 5],
+            ['title' => $this->t('FAQ', 'FAQ'), 'path' => '/#faq', 'page' => $homePage, 'position' => 6],
         ];
 
         foreach ($items as $item) {
             MenuItem::create(
                 [
                     'menu_id' => $menu->id,
-                    'page_id' => $page->id,
+                    'page_id' => $item['page']->id,
                     'section_key' => null,
                     'title' => $item['title'],
                     'description' => null,
@@ -193,7 +210,7 @@ class VoltzTemplateSeeder extends Seeder
             'image' => '/assets/img/all-images/hero/hero-img1.png',
             'background_image' => '/assets/img/all-images/bg/hero-bg1.png',
             'primary_text' => $this->t('Discover Our Solutions', 'Decouvrir nos solutions'),
-            'primary_link' => '/services',
+            'primary_link' => '/#services',
             'secondary_text' => $this->t('About KYA-Energy', 'A propos de KYA-Energy'),
             'secondary_link' => '/about',
         ];
@@ -255,6 +272,13 @@ class VoltzTemplateSeeder extends Seeder
         ];
 
         return [
+            '__meta' => [
+                'title' => $this->t('Home', 'Accueil'),
+                'content' => $this->t(
+                    'KYA-Energy Group — solar energy solutions in Togo and West Africa',
+                    'KYA-Energy Group — solutions solaires au Togo et en Afrique de l Ouest'
+                ),
+            ],
             'Header' => [
                 'title' => $this->t('Header', 'En-tete'),
                 'data_structure' => ['index' => [
@@ -307,10 +331,10 @@ class VoltzTemplateSeeder extends Seeder
                 'data' => [
                     'index' => ['background_image' => '/assets/img/all-images/bg/ot-bg1.png'],
                     'items' => [
-                        ['icon' => '/assets/img/icons/ot-icons1.svg', 'title' => $this->t('500+ Certified Solar Installations in West Africa', 'Plus de 500 installations solaires certifiees en Afrique de l Ouest'), 'link' => '/projects'],
+                        ['icon' => '/assets/img/icons/ot-icons1.svg', 'title' => $this->t('500+ Certified Solar Installations in West Africa', 'Plus de 500 installations solaires certifiees en Afrique de l Ouest'), 'link' => '/#projects'],
                         ['icon' => '/assets/img/icons/ot-icons2.svg', 'title' => $this->t('1st ISO 9001:2015 Certified Solar Company in Togo', '1ere entreprise solaire certifiee ISO 9001:2015 au Togo'), 'link' => '/about'],
-                        ['icon' => '/assets/img/icons/ot-icons3.svg', 'title' => $this->t('Designed & Assembled Locally in Lomé', 'Concu et assemble localement a Lome'), 'link' => '/services'],
-                        ['icon' => '/assets/img/icons/ot-icons4.svg', 'title' => $this->t('24/7 Maintenance — Intervention Within 24 Hours', 'Maintenance 24 h/24 — intervention garantie sous 24 h'), 'link' => '/services'],
+                        ['icon' => '/assets/img/icons/ot-icons3.svg', 'title' => $this->t('Designed & Assembled Locally in Lomé', 'Concu et assemble localement a Lome'), 'link' => '/#services'],
+                        ['icon' => '/assets/img/icons/ot-icons4.svg', 'title' => $this->t('24/7 Maintenance — Intervention Within 24 Hours', 'Maintenance 24 h/24 — intervention garantie sous 24 h'), 'link' => '/#services'],
                     ],
                 ],
             ],
@@ -341,7 +365,7 @@ class VoltzTemplateSeeder extends Seeder
                                 'From KYA-SoP M for homes to KYA-SoP B for businesses, our locally assembled systems offer industrial reliability and total autonomy for irrigation, SMEs, schools and health centers.',
                                 'Du KYA-SoP M pour les menages au KYA-SoP B pour les entreprises, nos systemes assembles localement offrent fiabilite industrielle et autonomie totale pour irrigation, PME, ecoles et centres de sante.'
                             ),
-                            'link' => '/services',
+                            'link' => '/#services',
                         ],
                         [
                             'icon' => '/assets/img/icons/a-icons1.svg',
@@ -350,7 +374,7 @@ class VoltzTemplateSeeder extends Seeder
                                 'Energy audit, custom sizing with KYA-SolDesign, turnkey installation in 1–3 days for households, plus 24/7 monitoring and preventive maintenance across Togo and the sub-region.',
                                 'Audit energetique, dimensionnement sur mesure avec KYA-SolDesign, installation cle en main en 1 a 3 jours pour les menages, plus suivi et maintenance preventive 24 h/24 au Togo et dans la sous-region.'
                             ),
-                            'link' => '/services',
+                            'link' => '/#services',
                         ],
                     ],
                 ],
@@ -378,7 +402,7 @@ class VoltzTemplateSeeder extends Seeder
                                 'Intelligent electrosolar groups assembled in Togo: KYA-SoP M for homes, KYA-SoP B for productive use (irrigation, SMEs, shops). Financing available through banking partners.',
                                 'Groupes electrosolaires intelligents assembles au Togo : KYA-SoP M pour les menages, KYA-SoP B pour usages productifs (irrigation, PME, commerces). Financement possible via partenaires bancaires.'
                             ),
-                            'link' => '/services',
+                            'link' => '/#services',
                             'link_text' => $this->t('Learn More', 'En savoir plus'),
                         ],
                         [
@@ -389,7 +413,7 @@ class VoltzTemplateSeeder extends Seeder
                                 'From feasibility study to commissioning: energy audits, KYA-SolDesign sizing, off-grid and hybrid installations for health centers, schools, farms and institutions.',
                                 'De l etude de faisabilite a la mise en service : audits energetiques, dimensionnement KYA-SolDesign, installations hors reseau et hybrides pour centres de sante, ecoles, fermes et institutions.'
                             ),
-                            'link' => '/services',
+                            'link' => '/#services',
                             'link_text' => $this->t('Learn More', 'En savoir plus'),
                         ],
                         [
@@ -400,7 +424,7 @@ class VoltzTemplateSeeder extends Seeder
                                 '24/7 preventive maintenance with guaranteed intervention within 24 hours. Lithium batteries, all-in-one street lights and KYA-Flexy remote monitoring for lasting performance.',
                                 'Maintenance preventive 24 h/24 avec intervention garantie sous 24 h. Batteries lithium, lampadaires tout-en-un et suivi a distance KYA-Flexy pour une performance durable.'
                             ),
-                            'link' => '/services',
+                            'link' => '/#services',
                             'link_text' => $this->t('Learn More', 'En savoir plus'),
                         ],
                     ],
@@ -420,11 +444,11 @@ class VoltzTemplateSeeder extends Seeder
                         'title' => $this->t('Solar Energy at Work in Togo', 'L energie solaire en action au Togo'),
                     ],
                     'projects' => [
-                        ['image' => '/assets/img/all-images/projects/p-img1.png', 'title' => $this->t('Electrification of 314 Rural Health Centers', 'Electrification de 314 centres de sante ruraux'), 'category' => $this->t('Institutional — USAID', 'Institutionnel — USAID'), 'link' => '/projects'],
-                        ['image' => '/assets/img/all-images/projects/p-img2.png', 'title' => $this->t('7 Mini Power Plants — Togolese Armed Forces', '7 mini centrales — Forces armees togolaises'), 'category' => $this->t('86.4 kWp — Savanes Region', '86,4 kWc — Region des Savanes'), 'link' => '/projects'],
-                        ['image' => '/assets/img/all-images/projects/p-img4.png', 'title' => $this->t('8 Hybrid Mini Power Plants', '8 mini centrales hybrides'), 'category' => $this->t('Off-grid electrification', 'Electrification hors reseau'), 'link' => '/projects'],
-                        ['image' => '/assets/img/all-images/projects/p-img5.png', 'title' => $this->t('Regional Solar Academies — African Development Bank', 'Academies solaires regionales — Banque africaine de developpement'), 'category' => $this->t('Training & capacity building', 'Formation et renforcement de capacites'), 'link' => '/projects'],
-                        ['image' => '/assets/img/all-images/projects/p-img3.png', 'title' => $this->t('Ecobank Green Financing — KYA-SoP Access', 'Financement vert Ecobank — acces aux KYA-SoP'), 'category' => $this->t('SME & household financing', 'Financement PME et menages'), 'link' => '/projects'],
+                        ['image' => '/assets/img/all-images/projects/p-img1.png', 'title' => $this->t('Electrification of 314 Rural Health Centers', 'Electrification de 314 centres de sante ruraux'), 'category' => $this->t('Institutional — USAID', 'Institutionnel — USAID'), 'link' => '/#projects'],
+                        ['image' => '/assets/img/all-images/projects/p-img2.png', 'title' => $this->t('7 Mini Power Plants — Togolese Armed Forces', '7 mini centrales — Forces armees togolaises'), 'category' => $this->t('86.4 kWp — Savanes Region', '86,4 kWc — Region des Savanes'), 'link' => '/#projects'],
+                        ['image' => '/assets/img/all-images/projects/p-img4.png', 'title' => $this->t('8 Hybrid Mini Power Plants', '8 mini centrales hybrides'), 'category' => $this->t('Off-grid electrification', 'Electrification hors reseau'), 'link' => '/#projects'],
+                        ['image' => '/assets/img/all-images/projects/p-img5.png', 'title' => $this->t('Regional Solar Academies — African Development Bank', 'Academies solaires regionales — Banque africaine de developpement'), 'category' => $this->t('Training & capacity building', 'Formation et renforcement de capacites'), 'link' => '/#projects'],
+                        ['image' => '/assets/img/all-images/projects/p-img3.png', 'title' => $this->t('Ecobank Green Financing — KYA-SoP Access', 'Financement vert Ecobank — acces aux KYA-SoP'), 'category' => $this->t('SME & household financing', 'Financement PME et menages'), 'link' => '/#projects'],
                     ],
                 ],
             ],
@@ -524,7 +548,7 @@ class VoltzTemplateSeeder extends Seeder
                             ),
                             'author' => 'KYA-Energy Team',
                             'date' => 'Jan 24, 2025',
-                            'link' => '/blog',
+                            'link' => '/#blog',
                         ],
                         [
                             'image' => '/assets/img/all-images/blog/blog-img2.png',
@@ -535,7 +559,7 @@ class VoltzTemplateSeeder extends Seeder
                             ),
                             'author' => 'KYA-Energy Team',
                             'date' => 'Jan 22, 2025',
-                            'link' => '/blog',
+                            'link' => '/#blog',
                         ],
                         [
                             'image' => '/assets/img/all-images/blog/blog-img3.png',
@@ -546,7 +570,7 @@ class VoltzTemplateSeeder extends Seeder
                             ),
                             'author' => 'KYA-Energy Team',
                             'date' => 'Feb 15, 2025',
-                            'link' => '/blog',
+                            'link' => '/#blog',
                         ],
                     ],
                 ],
@@ -610,18 +634,334 @@ class VoltzTemplateSeeder extends Seeder
                     'quick_links' => [
                         ['title' => $this->t('Home', 'Accueil'), 'url' => '/'],
                         ['title' => $this->t('About Us', 'A propos'), 'url' => '/about'],
-                        ['title' => $this->t('Services', 'Services'), 'url' => '/services'],
-                        ['title' => $this->t('Projects', 'Projets'), 'url' => '/projects'],
-                        ['title' => $this->t('Blog', 'Blog'), 'url' => '/blog'],
+                        ['title' => $this->t('Services', 'Services'), 'url' => '/#services'],
+                        ['title' => $this->t('Projects', 'Projets'), 'url' => '/#projects'],
+                        ['title' => $this->t('Blog', 'Blog'), 'url' => '/#blog'],
                     ],
                     'service_links' => [
-                        ['title' => $this->t('KYA-SoP Solar Units', 'Groupes solaires KYA-SoP'), 'url' => '/services'],
-                        ['title' => $this->t('Energy Audit & Installation', 'Audit et installation'), 'url' => '/services'],
-                        ['title' => $this->t('Maintenance 24/7', 'Maintenance 24 h/24'), 'url' => '/services'],
+                        ['title' => $this->t('KYA-SoP Solar Units', 'Groupes solaires KYA-SoP'), 'url' => '/#services'],
+                        ['title' => $this->t('Energy Audit & Installation', 'Audit et installation'), 'url' => '/#services'],
+                        ['title' => $this->t('Maintenance 24/7', 'Maintenance 24 h/24'), 'url' => '/#services'],
                         ['title' => $this->t('Contact Us', 'Contactez-nous'), 'url' => '/#contact'],
-                        ['title' => $this->t('FAQ', 'FAQ'), 'url' => '/faq'],
+                        ['title' => $this->t('FAQ', 'FAQ'), 'url' => '/#faq'],
                     ],
                 ],
+            ],
+        ];
+    }
+
+    private function aboutPageSectionsDefinition(): array
+    {
+        $testimonials = [
+            [
+                'author_name' => 'Kossi Mensah',
+                'author_role' => $this->t('SME Owner, Lomé', 'Chef d entreprise, Lome'),
+                'content' => $this->t(
+                    '"Our KYA-SoP system keeps our shop running during CEET outages. Installation was fast and the after-sales team responds within 24 hours."',
+                    '"Notre groupe KYA-SoP maintient notre commerce en activite pendant les coupures de la CEET. Installation rapide et equipe SAV reactive sous 24 h."'
+                ),
+            ],
+            [
+                'author_name' => 'Afiwa Koffi',
+                'author_role' => $this->t('Homeowner, Kara', 'Proprietaire, Kara'),
+                'content' => $this->t(
+                    '"We finally have stable electricity at home. KYA-Energy sized our system perfectly and explained every step."',
+                    '"Nous avons enfin une electricite stable a la maison. KYA-Energy a parfaitement dimensionne notre installation."'
+                ),
+            ],
+            [
+                'author_name' => 'Dr. Komlan Adjei',
+                'author_role' => $this->t('Health Center Director', 'Directeur de centre de sante'),
+                'content' => $this->t(
+                    '"Solar electrification changed our daily operations: vaccines stay cold and patients are safer."',
+                    '"L electrification solaire a transforme notre quotidien : vaccins conserves et patients en securite."'
+                ),
+            ],
+        ];
+
+        $headerData = [
+            'logo' => '/assets/img/logo/logo1.png',
+            'address' => $this->t(self::ADDRESS_EN, self::ADDRESS_FR),
+            'email' => self::EMAIL,
+            'phone' => self::PHONE,
+            'cta_text' => $this->t('Request a Quote', 'Demander un devis'),
+            'cta_link' => '/about#contact',
+        ];
+
+        $footerData = [
+            'index' => [
+                'logo' => '/assets/img/logo/logo1.png',
+                'description' => $this->t(
+                    'KYA-Energy Group — major player in renewable energy in West Africa since 2015. Technological innovation, technical reliability and economic accessibility for a sustainable energy transition.',
+                    'KYA-Energy Group — acteur majeur des energies renouvelables en Afrique de l Ouest depuis 2015. Innovation technologique, fiabilite technique et accessibilite economique pour une transition energetique durable.'
+                ),
+                'address' => $this->t(self::ADDRESS_EN, self::ADDRESS_FR),
+                'phone' => self::PHONE,
+                'email' => self::EMAIL,
+                'copyright' => $this->t('© 2025 KYA-Energy Group. All Rights Reserved.', '© 2025 KYA-Energy Group. Tous droits reserves.'),
+                'quick_links_title' => $this->t('Quick Links', 'Liens rapides'),
+                'service_links_title' => $this->t('Our Services', 'Nos services'),
+                'contact_title' => $this->t('Contact Us', 'Contactez-nous'),
+            ],
+            'quick_links' => [
+                ['title' => $this->t('Home', 'Accueil'), 'url' => '/'],
+                ['title' => $this->t('About Us', 'A propos'), 'url' => '/about'],
+                ['title' => $this->t('Services', 'Services'), 'url' => '/#services'],
+                ['title' => $this->t('Projects', 'Projets'), 'url' => '/#projects'],
+                ['title' => $this->t('Blog', 'Blog'), 'url' => '/#blog'],
+            ],
+            'service_links' => [
+                ['title' => $this->t('KYA-SoP Solar Units', 'Groupes solaires KYA-SoP'), 'url' => '/#services'],
+                ['title' => $this->t('Energy Audit & Installation', 'Audit et installation'), 'url' => '/#services'],
+                ['title' => $this->t('Maintenance 24/7', 'Maintenance 24 h/24'), 'url' => '/#services'],
+                ['title' => $this->t('Contact Us', 'Contactez-nous'), 'url' => '/about#contact'],
+                ['title' => $this->t('FAQ', 'FAQ'), 'url' => '/#faq'],
+            ],
+        ];
+
+        return [
+            '__meta' => [
+                'title' => $this->t('About Us', 'A propos'),
+                'content' => $this->t(
+                    'Discover KYA-Energy Group — Togolese leader in solar energy since 2015',
+                    'Decouvrez KYA-Energy Group — leader togolais de l energie solaire depuis 2015'
+                ),
+            ],
+            'Header' => [
+                'title' => $this->t('Header', 'En-tete'),
+                'data_structure' => ['index' => [
+                    ['key' => 'logo', 'label' => $this->t('Logo'), 'type' => 'image', 'required' => false, 'options' => []],
+                    ['key' => 'address', 'label' => $this->t('Address', 'Adresse'), 'type' => 'i18n-text', 'required' => false, 'options' => []],
+                    ['key' => 'email', 'label' => $this->t('Email'), 'type' => 'text', 'required' => false, 'options' => []],
+                    ['key' => 'phone', 'label' => $this->t('Phone', 'Telephone'), 'type' => 'text', 'required' => false, 'options' => []],
+                    ['key' => 'cta_text', 'label' => $this->t('CTA text'), 'type' => 'i18n-text', 'required' => false, 'options' => []],
+                    ['key' => 'cta_link', 'label' => $this->t('CTA link'), 'type' => 'text', 'required' => false, 'options' => []],
+                ]],
+                'data' => ['index' => $headerData],
+            ],
+            'PageBanner' => [
+                'title' => $this->t('Page Banner', 'Banniere de page'),
+                'data_structure' => ['index' => [
+                    ['key' => 'title', 'label' => $this->t('Title'), 'type' => 'i18n-text', 'required' => true, 'options' => []],
+                    ['key' => 'background_image', 'label' => $this->t('Background'), 'type' => 'image', 'required' => false, 'options' => []],
+                    ['key' => 'image', 'label' => $this->t('Side image'), 'type' => 'image', 'required' => false, 'options' => []],
+                ]],
+                'data' => [
+                    'index' => [
+                        'title' => $this->t('About Us', 'A propos'),
+                        'breadcrumb_home_label' => $this->t('Home', 'Accueil'),
+                        'breadcrumb_home_link' => '/',
+                        'breadcrumb_current' => $this->t('About Us', 'A propos'),
+                        'background_image' => '/assets/img/all-images/bg/hero-bg1.png',
+                        'image' => '/assets/img/all-images/hero/hero-img1.png',
+                    ],
+                ],
+            ],
+            'AboutStory' => [
+                'title' => $this->t('About Story', 'Notre histoire'),
+                'data_structure' => ['index' => [
+                    ['key' => 'title', 'label' => $this->t('Title'), 'type' => 'i18n-text', 'required' => true, 'options' => []],
+                ], 'highlights' => ['title' => $this->t('Highlights'), 'items' => [
+                    ['key' => 'title', 'label' => $this->t('Title'), 'type' => 'i18n-text', 'required' => true, 'options' => []],
+                    ['key' => 'text', 'label' => $this->t('Text'), 'type' => 'i18n-editor', 'required' => false, 'options' => []],
+                ]]],
+                'data' => [
+                    'index' => [
+                        'subtitle' => $this->t('About KYA-Energy Group', 'A propos de KYA-Energy Group'),
+                        'title' => $this->t('Smart Solar Solutions for a Sustainable Africa', 'Solutions solaires intelligentes pour une Afrique durable'),
+                        'description' => $this->t(
+                            'Since 2015, KYA-Energy Group designs and assembles intelligent KYA-SoP electrosolar units in Togo. We deliver reliable, affordable and ISO 9001:2015 certified energy for households, SMEs and institutions across West Africa.',
+                            'Depuis 2015, KYA-Energy Group concoit et assemble des groupes electrosolaires KYA-SoP intelligents au Togo. Nous offrons une energie fiable, accessible et certifiee ISO 9001:2015 aux menages, PME et institutions en Afrique de l Ouest.'
+                        ),
+                        'image_primary' => '/assets/img/all-images/about/about-img1.png',
+                        'image_secondary' => '/assets/img/all-images/about/about-img1.png',
+                        'video_url' => 'https://www.youtube.com/watch?v=Y8XpQpW5OVY',
+                        'button_text' => $this->t('Learn More', 'En savoir plus'),
+                        'button_link' => '/#services',
+                        'phone' => self::PHONE,
+                        'phone_label' => $this->t('GIVE US A CALL', 'APPELEZ-NOUS'),
+                    ],
+                    'highlights' => [
+                        [
+                            'icon' => '/assets/img/icons/ot-icons1.svg',
+                            'title' => $this->t('Innovating Solar Energy', 'Innovation solaire'),
+                            'text' => $this->t('Locally assembled KYA-SoP systems built for African climate and grid conditions.', 'Groupes KYA-SoP assembles localement pour le climat et le reseau africains.'),
+                            'link' => '/#services',
+                        ],
+                        [
+                            'icon' => '/assets/img/icons/ot-icons2.svg',
+                            'title' => $this->t('Powerful Solutions', 'Solutions performantes'),
+                            'text' => $this->t('From homes to health centers — turnkey engineering and 24/7 support.', 'Des menages aux centres de sante — ingenierie cle en main et support 24 h/24.'),
+                            'link' => '/#projects',
+                        ],
+                    ],
+                ],
+            ],
+            'Approach' => [
+                'title' => $this->t('Our Approach', 'Notre approche'),
+                'data_structure' => ['index' => [
+                    ['key' => 'title', 'label' => $this->t('Title'), 'type' => 'i18n-text', 'required' => true, 'options' => []],
+                ]],
+                'data' => [
+                    'index' => [
+                        'subtitle' => $this->t('Our Approach', 'Notre approche'),
+                        'title' => $this->t('Powering Energy Access Across Africa', 'Accelerer l acces a l energie en Afrique'),
+                        'vision_title' => $this->t('Our Vision', 'Notre vision'),
+                        'vision_text' => $this->t(
+                            'A future where clean, reliable electricity is accessible to every household and business in Africa — through locally designed solar technology.',
+                            'Un avenir ou l electricite propre et fiable est accessible a chaque menage et entreprise en Afrique — grace a une technologie solaire concue localement.'
+                        ),
+                        'mission_title' => $this->t('Our Mission', 'Notre mission'),
+                        'mission_text' => $this->t(
+                            'Design, assemble and deploy KYA-SoP solar systems with ISO-certified quality, while training local talent and partnering with institutions to scale energy access.',
+                            'Concevoir, assembler et deployer des systemes solaires KYA-SoP avec une qualite certifiee ISO, tout en formant des talents locaux et en partenariat avec les institutions pour elargir l acces a l energie.'
+                        ),
+                        'button_text' => $this->t('Learn More', 'En savoir plus'),
+                        'button_link' => '/#projects',
+                        'image_primary' => '/assets/img/all-images/about/about-img1.png',
+                        'image_secondary' => '/assets/img/all-images/service/s-img1.png',
+                    ],
+                ],
+            ],
+            'WhyChoose' => [
+                'title' => $this->t('Why Choose Us', 'Pourquoi nous choisir'),
+                'data_structure' => ['index' => [
+                    ['key' => 'title', 'label' => $this->t('Title'), 'type' => 'i18n-text', 'required' => true, 'options' => []],
+                ], 'items' => ['title' => $this->t('Reasons'), 'items' => [
+                    ['key' => 'title', 'label' => $this->t('Title'), 'type' => 'i18n-text', 'required' => true, 'options' => []],
+                    ['key' => 'text', 'label' => $this->t('Text'), 'type' => 'i18n-editor', 'required' => false, 'options' => []],
+                ]]],
+                'data' => [
+                    'index' => [
+                        'subtitle' => $this->t('WHY CHOOSE KYA-ENERGY', 'POURQUOI KYA-ENERGY'),
+                        'title' => $this->t('Powering the Future with Innovation and Reliability', 'Propulser l avenir avec innovation et fiabilite'),
+                        'description' => $this->t(
+                            'First ISO 9001:2015 certified solar company in Togo, with 500+ installations and guaranteed intervention within 24 hours.',
+                            'Premiere entreprise solaire certifiee ISO 9001:2015 au Togo, avec plus de 500 installations et intervention garantie sous 24 h.'
+                        ),
+                        'button_text' => $this->t('Learn More', 'En savoir plus'),
+                        'button_link' => '/#projects',
+                        'image_primary' => '/assets/img/all-images/about/about-img1.png',
+                        'image_secondary' => '/assets/img/all-images/projects/p-img1.png',
+                    ],
+                    'items' => [
+                        [
+                            'icon' => '/assets/img/icons/ot-icons1.svg',
+                            'title' => $this->t('Revolutionizing Power with Smart Solutions', 'Reinventer l energie avec des solutions intelligentes'),
+                            'text' => $this->t('KYA-SoP units designed and assembled in Lomé for total autonomy.', 'Groupes KYA-SoP concus et assembles a Lome pour une autonomie totale.'),
+                            'link' => '/#services',
+                        ],
+                        [
+                            'icon' => '/assets/img/icons/ot-icons2.svg',
+                            'title' => $this->t('Tailored Energy Solutions for Every Need', 'Des solutions sur mesure pour chaque besoin'),
+                            'text' => $this->t('Energy audit, KYA-SolDesign sizing and turnkey installation.', 'Audit energetique, dimensionnement KYA-SolDesign et installation cle en main.'),
+                            'link' => '/#services',
+                        ],
+                    ],
+                ],
+            ],
+            'TestimonialsSlider' => [
+                'title' => $this->t('Testimonials Slider', 'Temoignages carousel'),
+                'data_structure' => ['index' => [
+                    ['key' => 'title', 'label' => $this->t('Title'), 'type' => 'i18n-text', 'required' => true, 'options' => []],
+                ], 'testimonials' => ['title' => $this->t('Testimonials'), 'items' => [
+                    ['key' => 'author_name', 'label' => $this->t('Author'), 'type' => 'text', 'required' => true, 'options' => []],
+                    ['key' => 'content', 'label' => $this->t('Content'), 'type' => 'text', 'required' => true, 'options' => []],
+                ]]],
+                'data' => [
+                    'index' => [
+                        'subtitle' => $this->t('TESTIMONIALS', 'TEMOIGNAGES'),
+                        'title' => $this->t('What Our Customers Say', 'Ce que disent nos clients'),
+                    ],
+                    'testimonials' => collect($testimonials)->values()->map(fn (array $item, int $i) => [
+                        'author_name' => $item['author_name'],
+                        'author_role' => $item['author_role'],
+                        'author_image' => '/assets/img/all-images/testimonial/testi-img'.($i + 1).'.png',
+                        'content' => $item['content'],
+                        'rating' => 5,
+                    ])->all(),
+                ],
+            ],
+            'Team' => [
+                'title' => $this->t('Team', 'Equipe'),
+                'data_structure' => ['index' => [
+                    ['key' => 'title', 'label' => $this->t('Title'), 'type' => 'i18n-text', 'required' => true, 'options' => []],
+                ], 'members' => ['title' => $this->t('Members'), 'items' => [
+                    ['key' => 'name', 'label' => $this->t('Name'), 'type' => 'text', 'required' => true, 'options' => []],
+                    ['key' => 'role', 'label' => $this->t('Role'), 'type' => 'i18n-text', 'required' => false, 'options' => []],
+                    ['key' => 'image', 'label' => $this->t('Image'), 'type' => 'image', 'required' => false, 'options' => []],
+                ]]],
+                'data' => [
+                    'index' => [
+                        'subtitle' => $this->t('Our team', 'Notre equipe'),
+                        'title' => $this->t('Meet Our Expert Team', 'Rencontrez notre equipe d experts'),
+                    ],
+                    'members' => [
+                        [
+                            'name' => 'Yao Azoumah',
+                            'role' => $this->t('Founder & CEO', 'Fondateur et PDG'),
+                            'image' => '/assets/img/all-images/testimonial/testi-img1.png',
+                            'link' => '/about',
+                        ],
+                        [
+                            'name' => 'KYA Engineering',
+                            'role' => $this->t('Technical & Installation Team', 'Equipe technique et installation'),
+                            'image' => '/assets/img/all-images/testimonial/testi-img2.png',
+                            'link' => '/about',
+                        ],
+                        [
+                            'name' => 'KYA After-Sales',
+                            'role' => $this->t('Maintenance & Support 24/7', 'Maintenance et support 24 h/24'),
+                            'image' => '/assets/img/all-images/testimonial/testi-img3.png',
+                            'link' => '/about',
+                        ],
+                    ],
+                ],
+            ],
+            'Contact' => [
+                'title' => $this->t('Contact', 'Contact'),
+                'data_structure' => ['index' => [
+                    ['key' => 'title', 'label' => $this->t('Title'), 'type' => 'i18n-text', 'required' => true, 'options' => []],
+                    ['key' => 'layout', 'label' => $this->t('Layout'), 'type' => 'text', 'required' => false, 'options' => []],
+                ]],
+                'data' => [
+                    'index' => [
+                        'layout' => 'contact2',
+                        'subtitle' => $this->t('CONTACT US', 'CONTACTEZ-NOUS'),
+                        'title' => $this->t('Your Clean Energy Journey Begins Now', 'Votre parcours energetique commence maintenant'),
+                        'form_title' => $this->t('Send Us a Message', 'Envoyez-nous un message'),
+                        'description' => $this->t(
+                            'Whether you are an individual, business or institution, our engineers respond within 24 business hours. Call us at '.self::PHONE.' or WhatsApp '.self::PHONE_ALT.'.',
+                            'Particulier, entreprise ou institution : nos ingenieurs repondent sous 24 h ouvrables. Appelez le '.self::PHONE.' ou WhatsApp '.self::PHONE_ALT.'.'
+                        ),
+                        'map_embed' => self::MAP_EMBED,
+                    ],
+                ],
+            ],
+            'CTA' => [
+                'title' => $this->t('CTA', 'Appel a l action'),
+                'data_structure' => ['index' => [
+                    ['key' => 'title', 'label' => $this->t('Title'), 'type' => 'i18n-text', 'required' => true, 'options' => []],
+                ]],
+                'data' => [
+                    'index' => [
+                        'title' => $this->t('Reliable Solar Power for Your Home and Business!', 'Une energie solaire fiable pour votre maison et votre entreprise !'),
+                        'description' => $this->t(
+                            'No more blackouts, no more energy worries! KYA-Energy ensures uninterrupted power with systems designed and assembled in Togo.',
+                            'Fini les coupures et le stress energetique ! KYA-Energy assure une alimentation continue avec des systemes concus et assembles au Togo.'
+                        ),
+                        'button_text' => $this->t('Request an Audit', 'Demander un audit'),
+                        'button_link' => '/about#contact',
+                        'image' => '/assets/img/all-images/cta/cta-img1.png',
+                    ],
+                ],
+            ],
+            'Footer' => [
+                'title' => $this->t('Footer', 'Pied de page'),
+                'data_structure' => ['index' => [
+                    ['key' => 'logo', 'label' => $this->t('Logo'), 'type' => 'image', 'required' => false, 'options' => []],
+                ]],
+                'data' => $footerData,
             ],
         ];
     }

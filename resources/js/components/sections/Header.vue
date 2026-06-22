@@ -7,6 +7,7 @@
   const page = usePage()
   const { getSectionRootData } = useContent()
   const { tr } = useHelper()
+  const { resolveMenuPath } = useVoltzNavigate()
 
   const root = getSectionRootData(props.sectionKey)
 
@@ -16,6 +17,13 @@
 
     return (mainMenu?.items || []).filter((item) => item.isVisible !== false)
   })
+
+  const currentPath = computed(() => page.url.split('?')[0].split('#')[0])
+
+  const isActivePath = (path: string) => {
+    const target = (path || '/').split('#')[0] || '/'
+    return currentPath.value === target
+  }
 </script>
 
 <template>
@@ -76,17 +84,17 @@
         <div class="row align-items-center">
           <div class="col-xl-2 col-md-6 col-6">
             <div class="vl-logo">
-              <a href="/">
+              <VoltzLink href="/">
                 <img :src="root?.logo || '/assets/img/logo/logo1.png'" alt="">
-              </a>
+              </VoltzLink>
             </div>
           </div>
           <div class="col-xl-7 d-none d-xl-block">
             <div class="vl-main-menu text-center">
               <nav class="vl-mobile-menu-active">
                 <ul>
-                  <li v-for="(item, index) in menuItems" :key="index">
-                    <a :href="item.path">{{ tr(item.title) }}</a>
+                  <li v-for="(item, index) in menuItems" :key="index" :class="{ active: isActivePath(item.path) }">
+                    <VoltzLink :href="resolveMenuPath(item.path)">{{ tr(item.title) }}</VoltzLink>
                   </li>
                 </ul>
               </nav>
@@ -96,10 +104,10 @@
             <div class="vl-hero-btn d-none d-xl-block text-end">
               <div class="sidebar_btn-area">
                 <div class="btn_area1">
-                  <a :href="root?.cta_link || '/contact'" class="vl-btn1">
+                  <VoltzLink :href="resolveMenuPath(root?.cta_link || '/#contact')" class="vl-btn1">
                     {{ tr(root?.cta_text) || 'Get A Quote' }}
                     <i class="fa-solid fa-arrow-right"></i>
-                  </a>
+                  </VoltzLink>
                 </div>
                 <div class="search-icon header__search header-search-btn">
                   <a href="#"><i class="fa-solid fa-magnifying-glass"></i></a>
@@ -127,9 +135,9 @@
       <div class="vl-offcanvas-wrapper">
         <div class="vl-offcanvas-header d-flex justify-content-between align-items-center mb-90">
           <div class="vl-offcanvas-logo">
-            <a href="/">
+            <VoltzLink href="/">
               <img :src="root?.logo || '/assets/img/logo/logo1.png'" alt="">
-            </a>
+            </VoltzLink>
           </div>
           <div class="vl-offcanvas-close">
             <button type="button" class="vl-offcanvas-close-toggle"><i class="fa-solid fa-xmark"></i></button>
